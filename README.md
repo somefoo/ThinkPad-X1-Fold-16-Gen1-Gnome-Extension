@@ -1,17 +1,32 @@
-# Bottom Half Blocker
+# ThinkPad-X1-Fold-16-Gen1-Gnome-Extension
+
+<table>
+<tr>
+<td width="420" valign="top">
+
+<img src="https://github.com/user-attachments/assets/1d668f37-43c0-4fd9-8d1c-7d7630694d87" width="400">
+
+</td>
+<td valign="top">
+
+## Bottom Half Blocker
 
 GNOME Shell extension for the ThinkPad X1 Fold 16 Gen 1.
 
-Warning 1: this extension has only been tested on GNOME Shell 50.
+**Warning 1:** this extension has only been tested on GNOME Shell 50.
 
-Warning 2: this extension only provides an approximation of the Windows behaviour. Full-screen applications and Gnome pop-ups will ignore the mode :D
+**Warning 2:** this extension only provides an approximation of the Windows behaviour. Full-screen applications and GNOME pop-ups will ignore the mode :D
 
 It adds a small panel indicator that shows the current mode:
 
-- `Laptop`: keyboard attached, bottom half of the primary display is blocked
+- `Laptop`: keyboard attached, bottom half of the primary display is blocked  
 - `Tablet`: keyboard detached, full display is available
 
 The extension also exposes a `Force Tablet` switch in the panel menu to override the detected state.
+
+</td>
+</tr>
+</table>
 
 ## How it works
 
