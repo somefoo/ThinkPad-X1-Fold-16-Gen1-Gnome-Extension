@@ -2,7 +2,9 @@
 
 GNOME Shell extension for the ThinkPad X1 Fold 16 Gen 1.
 
-Warning: this extension has only been tested on GNOME Shell 50.
+Warning 1: this extension has only been tested on GNOME Shell 50.
+
+Warning 2: this extension only provides an approximation of the Windows behaviour. Full-screen applications and Gnome pop-ups will ignore the mode :D
 
 It adds a small panel indicator that shows the current mode:
 
