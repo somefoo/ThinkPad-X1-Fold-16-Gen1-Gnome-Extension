@@ -13,8 +13,10 @@ const KEYBOARD_ATTACHED_PATH = '/sys/devices/platform/thinkpad_acpi/keyboard_att
 export default class BottomHalfBlockerExtension extends Extension {
     enable() {
         this._blocked = false;
+        this._hasKeyboardAttachedState = false;
         this._keyboardAttached = false;
         this._forceTablet = false;
+        this._manualTabletMode = true;
         this._overlay = null;
         this._allocationSignalId = 0;
         this._pollSourceId = 0;
@@ -22,21 +24,21 @@ export default class BottomHalfBlockerExtension extends Extension {
 
         this._button = new PanelMenu.Button(0.0, 'Bottom Half Blocker', false);
         this._label = new St.Label({
-            text: 'Laptop',
+            text: 'Tablet',
             y_align: Clutter.ActorAlign.CENTER,
         });
         this._button.add_child(this._label);
 
-        this._toggleItem = new PopupMenu.PopupSwitchMenuItem('Keyboard Attached', false);
-        this._toggleItem.setSensitive(false);
-        this._button.menu.addMenuItem(this._toggleItem);
+        this._modeItem = new PopupMenu.PopupSwitchMenuItem('Tablet Mode', false);
+        this._modeItem.connect('toggled', (_item, state) => {
+            if (this._hasKeyboardAttachedState)
+                this._forceTablet = state;
+            else
+                this._manualTabletMode = state;
 
-        this._forceTabletItem = new PopupMenu.PopupSwitchMenuItem('Force Tablet', false);
-        this._forceTabletItem.connect('toggled', (_item, state) => {
-            this._forceTablet = state;
             this._syncState();
         });
-        this._button.menu.addMenuItem(this._forceTabletItem);
+        this._button.menu.addMenuItem(this._modeItem);
         Main.panel.addToStatusArea(this.uuid, this._button);
 
         this._signals = [
@@ -73,6 +75,7 @@ export default class BottomHalfBlockerExtension extends Extension {
         }
 
         this._label = null;
+        this._modeItem = null;
         this._keyboardAttachedFile = null;
     }
 
@@ -87,16 +90,21 @@ export default class BottomHalfBlockerExtension extends Extension {
     }
 
     _refreshBlockedState() {
+        this._hasKeyboardAttachedState = this._keyboardAttachedFile.query_exists(null);
         this._keyboardAttached = this._readKeyboardAttachedOnScreen();
         this._syncState();
         return GLib.SOURCE_CONTINUE;
     }
 
     _syncState() {
-        const blocked = this._keyboardAttached && !this._forceTablet;
+        const blocked = this._hasKeyboardAttachedState
+            ? this._keyboardAttached && !this._forceTablet
+            : !this._manualTabletMode;
+        const tabletMode = !blocked;
 
-        this._label?.set_text(blocked ? 'Laptop' : 'Tablet');
-        this._toggleItem?.setToggleState(this._keyboardAttached);
+        this._label?.set_text(tabletMode ? 'Tablet' : 'Laptop');
+        this._modeItem?.label.set_text(this._hasKeyboardAttachedState ? 'Force Tablet' : 'Tablet Mode');
+        this._modeItem?.setToggleState(this._hasKeyboardAttachedState ? this._forceTablet : this._manualTabletMode);
 
         if (this._blocked === blocked)
             return;
@@ -107,7 +115,7 @@ export default class BottomHalfBlockerExtension extends Extension {
 
     _readKeyboardAttachedOnScreen() {
         try {
-            if (!this._keyboardAttachedFile.query_exists(null))
+            if (!this._hasKeyboardAttachedState)
                 return false;
 
             const [, contents] = this._keyboardAttachedFile.load_contents(null);
